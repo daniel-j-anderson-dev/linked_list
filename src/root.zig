@@ -11,3 +11,8 @@
 const std: type = @import("std");
 // create a type level binding to the standard library's `Allocator` interface.
 const Allocator: type = std.mem.Allocator;
+
+/// A singly linked list
+pub fn LinkedList() type {
+    return struct {};
+}
