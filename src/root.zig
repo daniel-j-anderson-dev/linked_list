@@ -71,9 +71,12 @@ pub fn LinkedList(T: type) type {
                 return output.data;
             }
         };
+        /// Creates an `Iterator` over the `data` at each `Node` of this list
         pub fn iterator(self: *Self) Iterator {
             return .{ .current = self.head };
         }
+
+        /// Returns the element at index `i` the `head` of the this `LinkedList` is index 0
         pub fn get(self: *Self, i: usize) ?*T {
             if (i >= self.length) return null;
             var iter = self.iterator();
@@ -82,22 +85,17 @@ pub fn LinkedList(T: type) type {
                 if (i == n) return element;
             return null;
         }
-
+        /// append value to the front of this `LinkedList`
         pub fn push(self: *Self, allocator: Allocator, value: T) Allocator.Error!void {
             self.head = try Node.init(allocator, value, self.head);
             self.length += 1;
         }
-        pub fn peek(self: *Self) ?*T {
-            return (self.head orelse return null).data;
-        }
-        fn popNode(self: *Self) ?*Node {
-            const old_head = self.head;
-            self.head = if (self.head) |head| head.next else return null;
-            self.length -= 1;
-            return old_head orelse null;
-        }
+        /// remove the head form this `LinkedList`
         pub fn pop(self: *Self) ?*T {
-            return (self.popNode() orelse return null).data;
+            const old_head = self.head orelse return null;
+            self.head = old_head.next;
+            self.length -= 1;
+            return old_head.data;
         }
     };
 }
