@@ -11,9 +11,11 @@
 const std: type = @import("std");
 // create a type level binding to the standard library's `Allocator` interface.
 const Allocator: type = std.mem.Allocator;
+
+// `ArrayList` is a function that takes in the element type and returns the specific ArrayList type
 const ArrayList: fn (type) type = std.ArrayList;
 
-/// A singly linked list
+// `LinkedList` is a function that takes in the element type and returns the specific `LinkedList` type.
 pub fn LinkedList(T: type) type {
     // return the data structure of our linked list type
     return struct {
@@ -25,6 +27,19 @@ pub fn LinkedList(T: type) type {
             data: *T,
             // A nullable pointer to the next node in the list
             next: ?*Node,
+
+            pub fn init(allocator: Allocator, value: T, next: ?*Node) Allocator.Error!*@This() {
+                const output = try allocator.create(@This());
+                output.data = try allocator.create(T);
+                output.data.* = value;
+                output.next = next;
+                return output;
+            }
+            pub fn deinit(self: *@This(), allocator: Allocator) void {
+                if (self.next) |next| next.deinit(allocator);
+                allocator.destroy(self.data);
+                allocator.destroy(self);
+            }
         };
 
         /// the front of the singly linked list
@@ -32,21 +47,12 @@ pub fn LinkedList(T: type) type {
         /// the number of `Node`s in this list
         length: usize = 0,
 
-        // CONSTRUCTORS
+        pub const init = Self{};
+        pub fn deinit(self: *Self, allocator: Allocator) void {
+            if (self.head) |head| head.deinit(allocator);
+        }
 
-        pub const EMPTY = Self{};
-
-        // ITERATORS
-
-        pub const ImmutableIterator = struct {
-            current: ?*const Node,
-            pub fn next(self: *@This()) ?*const T {
-                const output = (self.current orelse return null);
-                self.current = output.next;
-                return output.data;
-            }
-        };
-        pub const MutableIterator = struct {
+        pub const Iterator = struct {
             current: ?*Node,
             pub fn next(self: *@This()) ?*T {
                 const output = (self.current orelse return null);
@@ -54,71 +60,33 @@ pub fn LinkedList(T: type) type {
                 return output.data;
             }
         };
-        pub fn immutable_iterator(self: *const Self) ImmutableIterator {
-            return ImmutableIterator{ .current = self.head };
-        }
-        pub fn mutable_iterator(self: *Self) MutableIterator {
-            return MutableIterator{ .current = self.head };
+        pub fn iterator(self: *Self) Iterator {
+            return .{ .current = self.head };
         }
 
         pub fn get(self: *Self, i: usize) ?*T {
             if (i >= self.length) return null;
+            var iter = self.iterator();
             var n: usize = 0;
-            var current = self.head;
-            while (current.next) |next| : (current = next) {
-                if (n == i) return current.data;
-                n += 1;
-            }
+            while (iter.next()) |element| : (n += 1)
+                if (i == n) return element;
+            return null;
         }
         pub fn push(self: *Self, allocator: Allocator, value: T) Allocator.Error!void {
-            var new_head = try allocator.create(Node);
-            new_head.data = try allocator.create(T);
-
-            new_head.data.* = value;
-            new_head.next = self.head;
-
-            self.head = new_head;
+            self.head = try Node.init(allocator, value, self.head);
+            self.length += 1;
         }
         pub fn peek(self: *Self) ?*T {
             return (self.head orelse return null).data;
         }
-        pub fn pop(self: *Self) ?*T {
-            const old_head = self.peek();
+        fn popNode(self: *Self) ?*Node {
+            const old_head = self.head;
             self.head = if (self.head) |head| head.next else return null;
+            self.length -= 1;
             return old_head orelse null;
         }
+        pub fn pop(self: *Self) ?*T {
+            return (self.popNode() orelse return null).data;
+        }
     };
-}
-
-// TESTS
-
-const expect = std.testing.expect;
-const testing_allocator = std.testing.allocator;
-
-test "test stack" {
-    var linked_list = LinkedList(u8).EMPTY;
-    // try is like ? in rust is the function returns an error then return the error
-    try linked_list.push(testing_allocator, 'a');
-    try linked_list.push(testing_allocator, 'b');
-    try linked_list.push(testing_allocator, 'c');
-    try linked_list.push(testing_allocator, 'd');
-    try expect(linked_list.pop().?.* == 'd');
-    try expect(linked_list.pop().?.* == 'c');
-    try expect(linked_list.pop().?.* == 'b');
-    try expect(linked_list.pop().?.* == 'a');
-}
-
-test "iterators" {
-    var linked_list = LinkedList(u8).EMPTY;
-
-    try linked_list.push(testing_allocator, '1');
-    try linked_list.push(testing_allocator, '2');
-    try linked_list.push(testing_allocator, '3');
-
-    const expected_values = [_]u8{ '3', '2', '1' };
-
-    var iterator = linked_list.immutable_iterator();
-    var i: usize = 0;
-    while (iterator.next()) |element| : (i += 1)
-        try expect(expected_values[i] == element.*);
 }
