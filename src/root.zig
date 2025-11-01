@@ -13,6 +13,15 @@ const std: type = @import("std");
 const Allocator: type = std.mem.Allocator;
 
 /// A singly linked list
-pub fn LinkedList() type {
-    return struct {};
+pub fn LinkedList(T: type) type {
+    return struct {
+        const Self: type = @This();
+
+        pub const Node = struct {
+            data: *T,
+            next: ?*Node,
+        };
+
+        head: ?*Node,
+    };
 }
