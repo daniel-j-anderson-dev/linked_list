@@ -19,16 +19,19 @@ const ArrayList: fn (type) type = std.ArrayList;
 pub fn LinkedList(T: type) type {
     // return the data structure of our linked list type
     return struct {
+        // TYPES
+
+        /// A type level binding to this specific `LinkedList` type
         const Self: type = @This();
 
-        /// A `Node` in the list
+        /// A `Node` in this `LinkedList`
         pub const Node = struct {
             /// A pointer to the actual data at this node
             data: *T,
             /// A nullable pointer to the next node in the list
             next: ?*Node,
 
-            /// allocate a `Node`
+            /// allocate a `Node`, `T` `data` at that node, and link a `next` `node`
             pub fn init(allocator: Allocator, value: T, next: ?*Node) !*Node {
                 // allocate memory for the node
                 const output = try allocator.create(Node);
@@ -41,7 +44,7 @@ pub fn LinkedList(T: type) type {
 
                 return output;
             }
-            /// free this node and recursively free all `next` nodes
+            /// free this `Node` and recursively free all `next` `Node`s
             pub fn deinit(self: *Node, allocator: Allocator) void {
                 // recursively destroy all nodes after this one
                 // `self.next` being `null` is the base case
@@ -59,7 +62,7 @@ pub fn LinkedList(T: type) type {
         length: usize = 0,
 
         /// use the default values to initialize a `LinkedList`. use `defer` to clean up the `Node`s
-        pub const init = Self{};
+        pub const empty = Self{};
         /// `deinit` the `head` if it exists
         pub fn deinit(self: *Self, allocator: Allocator) void {
             if (self.head) |head| head.deinit(allocator);
