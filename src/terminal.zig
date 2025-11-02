@@ -1,35 +1,33 @@
 const builtin = @import("builtin");
 const std = @import("std");
 const File = std.fs.File;
-const Io = std.Io;
+const Writer = std.Io.Writer;
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
 fn stack_buffered(comptime n: usize) type {
     return struct {
-        const Self = @This();
-        
         pub fn print(comptime format_string: []const u8, format_arguments: anytype) !void {
             var stdout_buffer = [_]u8{0} ** n;
-            var stdout_reader: File.Writer = File.stdout().writer(&stdout_buffer);
-            var stdout: *Io.Writer = &stdout_reader.interface;
+            var stdout_reader = File.stdout().writer(&stdout_buffer);
+            var stdout = &stdout_reader.interface;
 
             try stdout.print(format_string, format_arguments);
             try stdout.flush();
         }
         pub fn readLine(allocator: Allocator) !ArrayList(u8) {
             var stdin_buffer = [_]u8{0} ** n;
-            var stdin_reader: File.Reader = File.stdin().reader(&stdin_buffer);
-            var stdin: *Io.Reader = &stdin_reader.interface;
+            var stdin_reader = File.stdin().reader(&stdin_buffer);
+            var stdin = &stdin_reader.interface;
 
-            var line = Io.Writer.Allocating.init(allocator);
+            var line = Writer.Allocating.init(allocator);
             defer line.deinit();
             _ = try stdin.streamDelimiterEnding(&line.writer, '\n');
             return line.toArrayList();
         }
         fn input(allocator: Allocator, comptime format_string: []const u8, format_arguments: anytype) !ArrayList(u8) {
-            try Self.print(format_string, format_arguments);
-            return try Self.readLine(allocator);
+            try .print(format_string, format_arguments);
+            return try .readLine(allocator);
         }
     };
 }
