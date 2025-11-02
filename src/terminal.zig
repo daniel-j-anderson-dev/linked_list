@@ -7,6 +7,7 @@ const ArrayList = std.ArrayList;
 
 fn stack_buffered(comptime n: usize) type {
     return struct {
+        const Self = @This();
         pub fn print(comptime format_string: []const u8, format_arguments: anytype) !void {
             var stdout_buffer = [_]u8{0} ** n;
             var stdout_reader = File.stdout().writer(&stdout_buffer);
@@ -26,8 +27,8 @@ fn stack_buffered(comptime n: usize) type {
             return line.toArrayList();
         }
         fn input(allocator: Allocator, comptime format_string: []const u8, format_arguments: anytype) !ArrayList(u8) {
-            try .print(format_string, format_arguments);
-            return try .readLine(allocator);
+            try Self.print(format_string, format_arguments);
+            return try Self.readLine(allocator);
         }
     };
 }
