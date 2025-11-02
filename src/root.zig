@@ -29,7 +29,7 @@ pub fn LinkedList(T: type) type {
             next: ?*Node,
 
             /// allocate a `Node`
-            pub fn init(allocator: Allocator, value: T, next: ?*Node) Allocator.Error!*@This() {
+            pub fn init(allocator: Allocator, value: T, next: ?*@This()) !*@This() {
                 // allocate memory for the node
                 const output = try allocator.create(@This());
                 // allocate memory for the value
@@ -41,6 +41,7 @@ pub fn LinkedList(T: type) type {
 
                 return output;
             }
+            /// free this node and recursively free all `next` nodes
             pub fn deinit(self: *@This(), allocator: Allocator) void {
                 // recursively destroy all nodes after this one
                 // `self.next` being `null` is the base case
@@ -48,6 +49,7 @@ pub fn LinkedList(T: type) type {
                 // deallocate data and the node itself
                 allocator.destroy(self.data);
                 allocator.destroy(self);
+                self.* = undefined;
             }
         };
 
@@ -56,43 +58,47 @@ pub fn LinkedList(T: type) type {
         /// the number of `Node`s in this list. default to zero
         length: usize = 0,
 
-        /// use the default values to initialize a `LinkedList`. use `defer` to clean up `Node`s
+        /// use the default values to initialize a `LinkedList`. use `defer` to clean up the `Node`s
         pub const init = Self{};
+        /// `deinit` the `head` if it exists
         pub fn deinit(self: *Self, allocator: Allocator) void {
             if (self.head) |head| head.deinit(allocator);
         }
 
-        /// define how to loop over the linked list without exposing the underlying `Node`s of the list
-        pub const Iterator = struct {
-            current: ?*Node,
-            pub fn next(self: *@This()) ?*T {
-                const output = (self.current orelse return null);
-                self.current = output.next;
-                return output.data;
-            }
-        };
-        /// Creates an `Iterator` over the `data` at each `Node` of this list
-        pub fn iterator(self: *Self) Iterator {
-            return .{ .current = self.head };
-        }
+        /// Returns the a constant pointer to the element at the given `index` (the `head` of the this `LinkedList` is index 0).
+        pub fn get(self: *const Self, index: usize) !*const T {
+            if (self.length == 0) return error.Empty;
+            if (index >= self.length) return error.IndexOutOfBounds;
 
-        /// Returns the element at index `i` the `head` of the this `LinkedList` is index 0
-        pub fn get(self: *Self, i: usize) ?*T {
-            if (i >= self.length) return null;
-            var iter = self.iterator();
-            var n: usize = 0;
-            while (iter.next()) |element| : (n += 1)
-                if (i == n) return element;
-            return null;
+            var i: usize = 0;
+            var current = self.head;
+            while (current) |c| : (current = c.next) {
+                if (i == index) break;
+                i += 1;
+            }
+            return current.?.data;
+        }
+        /// Assigns the a `data` pointer of the element at the given `index` (the `head` of the this `LinkedList` is index 0).
+        pub fn set(self: *Self, index: usize, data: *T) !void {
+            if (self.length == 0) return error.Empty;
+            if (index >= self.length) return error.IndexOutOfBounds;
+
+            var i: usize = 0;
+            var current = self.head;
+            while (current) |c| : (current = c.next) {
+                if (i == index) break;
+                i += 1;
+            }
+            current.?.data = data;
         }
         /// append value to the front of this `LinkedList`
-        pub fn push(self: *Self, allocator: Allocator, value: T) Allocator.Error!void {
+        pub fn push(self: *Self, allocator: Allocator, value: T) !void {
             self.head = try Node.init(allocator, value, self.head);
             self.length += 1;
         }
-        /// remove the head form this `LinkedList`
-        pub fn pop(self: *Self) ?*T {
-            const old_head = self.head orelse return null;
+        /// remove the head form this `LinkedList` the caller owns the `T` value
+        pub fn pop(self: *Self) !*T {
+            const old_head = self.head orelse return error.Empty;
             self.head = old_head.next;
             self.length -= 1;
             return old_head.data;
