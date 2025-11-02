@@ -29,9 +29,9 @@ pub fn LinkedList(T: type) type {
             next: ?*Node,
 
             /// allocate a `Node`
-            pub fn init(allocator: Allocator, value: T, next: ?*@This()) !*@This() {
+            pub fn init(allocator: Allocator, value: T, next: ?*Node) !*Node {
                 // allocate memory for the node
-                const output = try allocator.create(@This());
+                const output = try allocator.create(Node);
                 // allocate memory for the value
                 output.data = try allocator.create(T);
 
@@ -42,7 +42,7 @@ pub fn LinkedList(T: type) type {
                 return output;
             }
             /// free this node and recursively free all `next` nodes
-            pub fn deinit(self: *@This(), allocator: Allocator) void {
+            pub fn deinit(self: *Node, allocator: Allocator) void {
                 // recursively destroy all nodes after this one
                 // `self.next` being `null` is the base case
                 if (self.next) |next| next.deinit(allocator);
