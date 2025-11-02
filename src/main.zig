@@ -1,9 +1,4 @@
-const builtin = @import("builtin");
 const std = @import("std");
-const File = std.fs.File;
-const Io = std.Io;
-const Allocator = std.mem.Allocator;
-const ArrayList = std.ArrayList;
 const DefaultGeneralPurposeAllocator = std.heap.GeneralPurposeAllocator(.{});
 
 /// this is a binding to the type described in `root.zig`.
