@@ -10,9 +10,8 @@ fn stack_buffered(comptime n: usize) type {
         const Self = @This();
         pub fn print(comptime format_string: []const u8, format_arguments: anytype) !void {
             var stdout_buffer = [_]u8{0} ** n;
-            var stdout_reader = File.stdout().writer(&stdout_buffer);
-            var stdout = &stdout_reader.interface;
-
+            var stdout_writer = File.stdout().writer(&stdout_buffer);
+            var stdout = &stdout_writer.interface;
             try stdout.print(format_string, format_arguments);
             try stdout.flush();
         }
