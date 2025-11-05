@@ -31,7 +31,8 @@ pub fn LinkedList(T: type) type {
             /// A nullable pointer to the next node in the list
             next: ?*Node,
 
-            /// allocate a `Node`, `T` `data` at that node, and link a `next` `node`
+            /// allocate a `Node` and
+            ///  `T` `data` at that node, and link a `next` `node`
             pub fn init(allocator: Allocator, value: T, next: ?*Node) !*Node {
                 // allocate memory for the node
                 const output = try allocator.create(Node);
@@ -51,22 +52,32 @@ pub fn LinkedList(T: type) type {
                 if (self.next) |next| next.deinit(allocator);
                 // deallocate data and the node itself
                 allocator.destroy(self.data);
-                allocator.destroy(self);
                 self.* = undefined;
             }
         };
+
+        // FIELDS
 
         /// the front of the singly linked list. default to `null`
         head: ?*Node = null,
         /// the number of `Node`s in this list. default to zero
         length: usize = 0,
 
+        // CONSTANTS
+
         /// use the default values to initialize a `LinkedList`. use `defer` to clean up the `Node`s
         pub const empty = Self{};
+
+        // FUNCTIONS
+
+        // destructors
+
         /// `deinit` the `head` if it exists
         pub fn deinit(self: *Self, allocator: Allocator) void {
             if (self.head) |head| head.deinit(allocator);
         }
+
+        // accessors
 
         /// Returns the a constant pointer to the element at the given `index` (the `head` of the this `LinkedList` is index 0).
         pub fn get(self: *const Self, index: usize) !*const T {
@@ -81,6 +92,9 @@ pub fn LinkedList(T: type) type {
             }
             return current.?.data;
         }
+
+        // mutators
+
         /// Assigns the a `data` pointer of the element at the given `index` (the `head` of the this `LinkedList` is index 0).
         pub fn set(self: *Self, index: usize, data: *T) !void {
             if (self.length == 0) return error.Empty;
