@@ -5,9 +5,10 @@ const Writer = std.Io.Writer;
 const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
+const String = ArrayList(u8);
+
 fn stack_buffered(comptime n: usize) type {
     return struct {
-        const Self = @This();
         pub fn print(comptime format_string: []const u8, format_arguments: anytype) !void {
             var stdout_buffer = [_]u8{0} ** n;
             var stdout_writer = File.stdout().writer(&stdout_buffer);
@@ -15,7 +16,7 @@ fn stack_buffered(comptime n: usize) type {
             try stdout.print(format_string, format_arguments);
             try stdout.flush();
         }
-        pub fn readLine(allocator: Allocator) !ArrayList(u8) {
+        pub fn readLine(allocator: Allocator) !String {
             var stdin_buffer = [_]u8{0} ** n;
             var stdin_reader = File.stdin().reader(&stdin_buffer);
             var stdin = &stdin_reader.interface;
@@ -25,9 +26,9 @@ fn stack_buffered(comptime n: usize) type {
             _ = try stdin.streamDelimiterEnding(&line.writer, '\n');
             return line.toArrayList();
         }
-        fn input(allocator: Allocator, comptime format_string: []const u8, format_arguments: anytype) !ArrayList(u8) {
-            try Self.print(format_string, format_arguments);
-            return try Self.readLine(allocator);
+        fn input(allocator: Allocator, comptime format_string: []const u8, format_arguments: anytype) !String {
+            try .print(format_string, format_arguments);
+            return try .readLine(allocator);
         }
     };
 }
