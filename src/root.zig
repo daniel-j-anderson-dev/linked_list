@@ -52,7 +52,7 @@ pub fn LinkedList(T: type) type {
                 if (self.next) |next| next.deinit(allocator);
                 // deallocate data and the node itself
                 allocator.destroy(self.data);
-                self.* = undefined;
+                allocator.destroy(self);
             }
         };
 
@@ -74,15 +74,25 @@ pub fn LinkedList(T: type) type {
 
         /// `deinit` the `head` if it exists
         pub fn deinit(self: *Self, allocator: Allocator) void {
+            // same thing as `if let Some(head) = self.head { head.deinit(allocator) }`
             if (self.head) |head| head.deinit(allocator);
+            // `.*` is the dereference operator in zig
+            // `undefined` keyword means that any reads or writes to the value are undefined behavior
+            self.* = undefined;
         }
 
         // accessors
 
+        pub fn is_empty(self: *const Self) bool {
+            return self.length == 0;
+        }
+        pub fn in_bounds(self: *const Self, index: usize) bool {
+            return index < self.length;
+        }
         /// Returns the a constant pointer to the element at the given `index` (the `head` of the this `LinkedList` is index 0).
         pub fn get(self: *const Self, index: usize) !*const T {
-            if (self.length == 0) return error.Empty;
-            if (index >= self.length) return error.IndexOutOfBounds;
+            if (self.is_empty()) return error.Empty;
+            if (!self.in_bounds(index)) return error.IndexOutOfBounds;
 
             var i: usize = 0;
             var current = self.head;
@@ -97,8 +107,8 @@ pub fn LinkedList(T: type) type {
 
         /// Assigns the a `data` pointer of the element at the given `index` (the `head` of the this `LinkedList` is index 0).
         pub fn set(self: *Self, index: usize, data: *T) !void {
-            if (self.length == 0) return error.Empty;
-            if (index >= self.length) return error.IndexOutOfBounds;
+            if (self.is_empty()) return error.Empty;
+            if (!self.in_bounds(index)) return error.IndexOutOfBounds;
 
             var i: usize = 0;
             var current = self.head;
@@ -113,12 +123,26 @@ pub fn LinkedList(T: type) type {
             self.head = try Node.init(allocator, value, self.head);
             self.length += 1;
         }
-        /// remove the head form this `LinkedList` the caller owns the `T` value
-        pub fn pop(self: *Self) !*T {
-            const old_head = self.head orelse return error.Empty;
-            self.head = old_head.next;
+        /// remove the head form this `LinkedList` the caller owns the `Node` which owns the `T` value
+        pub fn pop(self: *Self) !*Node {
+            var popped = self.head orelse return error.Empty;
+            self.head = popped.next;
             self.length -= 1;
-            return old_head.data;
+            popped.next = null;
+            return popped;
         }
     };
+}
+
+const test_allocator = std.testing.allocator;
+test "push and pop" {
+    var l = LinkedList(u2).empty;
+    try l.push(test_allocator, 0);
+    try l.push(test_allocator, 1);
+    try l.push(test_allocator, 2);
+    try l.push(test_allocator, 3);
+    (try l.pop()).deinit(test_allocator);
+    (try l.pop()).deinit(test_allocator);
+    (try l.pop()).deinit(test_allocator);
+    (try l.pop()).deinit(test_allocator);
 }
