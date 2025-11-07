@@ -39,4 +39,5 @@ fn stack_buffered(comptime n: usize) type {
 const buffer_size = 1024;
 pub const input = stack_buffered(buffer_size).input;
 pub const print = stack_buffered(buffer_size).print;
+pub const print_line = stack_buffered(buffer_size).print_line;
 pub const readLine = stack_buffered(buffer_size).readLine;
