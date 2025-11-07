@@ -123,7 +123,7 @@ pub fn LinkedList(T: type) type {
             self.head = try Node.init(allocator, value, self.head);
             self.length += 1;
         }
-        /// remove the head form this `LinkedList` the caller owns the `Node` which owns the `T` value
+        /// remove the head form this `LinkedList` the caller owns the `Node` destroy it with `Node.deinit`
         pub fn pop(self: *Self) !*Node {
             var popped = self.head orelse return error.Empty;
             self.head = popped.next;
@@ -136,13 +136,9 @@ pub fn LinkedList(T: type) type {
 
 const test_allocator = std.testing.allocator;
 test "push and pop" {
-    var l = LinkedList(u2).empty;
-    try l.push(test_allocator, 0);
-    try l.push(test_allocator, 1);
-    try l.push(test_allocator, 2);
-    try l.push(test_allocator, 3);
-    (try l.pop()).deinit(test_allocator);
-    (try l.pop()).deinit(test_allocator);
-    (try l.pop()).deinit(test_allocator);
-    (try l.pop()).deinit(test_allocator);
+    var l = LinkedList(usize).empty;
+    for (0..100) |i| {
+        try l.push(test_allocator, i);
+        (try l.pop()).deinit(test_allocator);
+    }
 }
