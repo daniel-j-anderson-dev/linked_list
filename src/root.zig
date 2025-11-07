@@ -160,3 +160,25 @@ test "push and pop" {
         (try l.pop()).deinit(test_allocator);
     }
 }
+test "from iterator" {
+    const Counter = struct {
+        start: usize,
+        end: usize,
+        pub fn next(self: *@This()) ?usize {
+            if (self.start >= self.end) return null;
+            const output = self.start;
+            self.start += 1;
+            return output;
+        }
+    };
+    var l = try LinkedList(usize).from_iterator(
+        test_allocator,
+        Counter{ .start = 0, .end = 100 },
+    );
+    defer l.deinit(test_allocator);
+    var current = l.head;
+    while (current) |c| : (current = c.next) {
+        try terminal.print("{}, ", .{});
+    }
+    try terminal.print_line("", .{});
+}
