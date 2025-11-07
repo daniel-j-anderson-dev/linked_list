@@ -6,6 +6,8 @@ const ArrayList = std.ArrayList;
 
 const String = ArrayList(u8);
 
+// FUNCTIONS
+
 fn stack_buffered(comptime n: usize) type {
     return struct {
         const Self = @This();
@@ -36,7 +38,10 @@ fn stack_buffered(comptime n: usize) type {
     };
 }
 
+// EXPORTS
+
 const buffer_size = 1024;
+// this an application of currying called partial function application
 pub const input = stack_buffered(buffer_size).input;
 pub const print = stack_buffered(buffer_size).print;
 pub const print_line = stack_buffered(buffer_size).print_line;
