@@ -2,6 +2,12 @@
 //!
 //! By convention, root.zig is the root source file when making a library.
 
+// EXPORTS
+
+/// this is a binding to the type described in `terminal.zig`.
+/// `@import` will also add the zig source file to the build graph inside the `@This()`
+pub const terminal = @import("terminal.zig");
+
 // IMPORTS
 
 // `const` creates an immutable binding.
@@ -23,6 +29,7 @@ pub fn LinkedList(T: type) type {
 
         /// A type level binding to this specific `LinkedList` type
         const Self: type = @This();
+        pub const Item = T;
 
         /// A `Node` in this `LinkedList`
         pub const Node = struct {
@@ -69,6 +76,15 @@ pub fn LinkedList(T: type) type {
         pub const empty = Self{};
 
         // FUNCTIONS
+
+        // constructors
+
+        pub fn from_iterator(allocator: Allocator, iterator: anytype) !Self {
+            var output = Self.empty;
+            var i = iterator;
+            while (i.next()) |value| try output.push(allocator, value);
+            return output;
+        }
 
         // destructors
 
@@ -124,8 +140,8 @@ pub fn LinkedList(T: type) type {
             self.length += 1;
         }
         /// remove the head form this `LinkedList` the caller owns the `Node` destroy it with `Node.deinit`
-        pub fn pop(self: *Self) !*Node {
-            var popped = self.head orelse return error.Empty;
+        pub fn pop(self: *Self) ?*Node {
+            var popped = self.head orelse return null;
             self.head = popped.next;
             self.length -= 1;
             popped.next = null;
@@ -135,8 +151,10 @@ pub fn LinkedList(T: type) type {
 }
 
 const test_allocator = std.testing.allocator;
+const expect = std.testing.expect;
 test "push and pop" {
     var l = LinkedList(usize).empty;
+    defer l.deinit(test_allocator);
     for (0..100) |i| {
         try l.push(test_allocator, i);
         (try l.pop()).deinit(test_allocator);
