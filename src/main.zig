@@ -3,12 +3,10 @@ const ArrayList = std.ArrayList;
 const GeneralPurposeAllocator = std.heap.GeneralPurposeAllocator;
 const Allocator = std.mem.Allocator;
 
-/// this is a binding to the type described in `linked_list.zig`. see `build.zig` line 10
-const linked_list = @import("linked_list");
-const LinkedList = linked_list.LinkedList;
-
-/// this is a binding to the type described in `terminal.zig`. see `build.zig` line 11
-const terminal = @import("terminal");
+/// this is a binding to the type described in `root.zig`. see `build.zig` line 7, 8
+const my_lib = @import("my_lib");
+const LinkedList = my_lib.LinkedList;
+const terminal = my_lib.terminal;
 
 const String = ArrayList(u8);
 
