@@ -4,7 +4,7 @@ const Build = std.Build;
 
 const executable_name = "a.out";
 const executable_path = "src/main.zig";
-const library_name = "linked_list";
+const library_name = "my_lib";
 const library_path = "src/root.zig";
 
 pub fn build(build_graph: *Build) void {
@@ -56,7 +56,7 @@ pub fn build(build_graph: *Build) void {
     if (build_graph.args) |args| run_executable.addArgs(args);
     run_command.dependOn(&run_executable.step);
 
-    // declare `zig build run`
+    // declare `zig build test`
     const test_command = build_graph.step("test", "Run tests");
     // add a compilation node for the module's tests
     const compile_module_tests = build_graph.addTest(.{ .root_module = library_module });
@@ -64,7 +64,7 @@ pub fn build(build_graph: *Build) void {
     const run_module_tests = build_graph.addRunArtifact(compile_module_tests);
     // the test command depends on each module's tests
     test_command.dependOn(&run_module_tests.step);
-    
+
     const executable_tests = build_graph.addTest(.{ .root_module = compile_executable.root_module });
     const run_executable_tests = build_graph.addRunArtifact(executable_tests);
     test_command.dependOn(&run_executable_tests.step);
