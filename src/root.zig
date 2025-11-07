@@ -65,7 +65,7 @@ pub fn LinkedList(T: type) type {
 
         // CONSTANTS
 
-        /// use the default values to initialize a `LinkedList`. use `defer` to clean up the `Node`s
+        /// use the default values to initialize a `LinkedList`. use `defer node.deinit()` to clean up the `Node`s
         pub const empty = Self{};
 
         // FUNCTIONS
