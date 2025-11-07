@@ -171,6 +171,7 @@ test "from iterator" {
             return output;
         }
     };
+    std.debug.print("\nhello\n", .{});
     var l = try LinkedList(usize).from_iterator(
         test_allocator,
         Counter{ .start = 0, .end = 100 },
@@ -178,7 +179,7 @@ test "from iterator" {
     defer l.deinit(test_allocator);
     var current = l.head;
     while (current) |c| : (current = c.next) {
-        try terminal.print("{}, ", .{});
+        try terminal.print("{}, ", .{c.data.*});
     }
     try terminal.print_line("", .{});
 }
