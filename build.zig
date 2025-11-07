@@ -4,13 +4,8 @@ const Build = std.Build;
 
 const executable_name = "a.out";
 const executable_path = "src/main.zig";
-
-const str = []const u8; // type alias `str` for a slice of bytes
-const module_meta_data = [_]struct { str, str }{
-    .{ "linked_list", "src/root.zig" },
-    .{ "terminal", "src/terminal.zig" },
-};
-const module_count = module_meta_data.len;
+const library_name = "linked_list";
+const library_path = "src/root.zig";
 
 pub fn build(build_graph: *Build) void {
     // SETTINGS
@@ -22,27 +17,15 @@ pub fn build(build_graph: *Build) void {
 
     // MODULES
 
-    // declare arrays to hold pointers to each `Build.Module` added to the `build_graph` and
-    var modules: [module_count]*Build.Module = undefined;
-    var executable_imports: [module_count]Build.Module.Import = undefined;
-    // populate arrays
-    for (0..module_count) |i| {
-        // get the name and path of each module from the global constant
-        const name, const path = module_meta_data[i];
-        // add a node that represent the `i`th source file as a module
-        modules[i] = build_graph.addModule(
-            name,
-            .{
-                .root_source_file = build_graph.path(path),
-                .target = target,
-                .optimize = optimization_options,
-            },
-        );
-        executable_imports[i] = .{
-            .name = name,
-            .module = modules[i],
-        };
-    }
+    // add the root library to the build graph
+    const library_module = build_graph.addModule(
+        library_name,
+        .{
+            .root_source_file = build_graph.path(library_path),
+            .target = target,
+            .optimize = optimization_options,
+        },
+    );
 
     // EXECUTABLES
 
@@ -53,7 +36,9 @@ pub fn build(build_graph: *Build) void {
             .root_source_file = build_graph.path(executable_path),
             .target = target,
             .optimize = optimization_options,
-            .imports = &executable_imports,
+            .imports = &.{
+                .{ .module = library_module, .name = library_name },
+            },
         }),
     });
     // add a node to store the compiled executable binary as an artifact
@@ -73,16 +58,14 @@ pub fn build(build_graph: *Build) void {
 
     // declare `zig build run`
     const test_command = build_graph.step("test", "Run tests");
-    // add each test node
-    for (modules) |module| {
-        // add a compilation node for the test module
-        const compile_module_tests = build_graph.addTest(.{ .root_module = module });
-        // Add a run node for the module's tests
-        const run_module_tests = build_graph.addRunArtifact(compile_module_tests);
-        // the test command depends on each module's tests
-        test_command.dependOn(&run_module_tests.step);
-    }
-    const compile_executable_test = build_graph.addTest(.{ .root_module = compile_executable.root_module });
-    const run_module_tests = build_graph.addRunArtifact(compile_executable_test);
+    // add a compilation node for the module's tests
+    const compile_module_tests = build_graph.addTest(.{ .root_module = library_module });
+    // Add a run node for the module's tests
+    const run_module_tests = build_graph.addRunArtifact(compile_module_tests);
+    // the test command depends on each module's tests
     test_command.dependOn(&run_module_tests.step);
+    
+    const executable_tests = build_graph.addTest(.{ .root_module = compile_executable.root_module });
+    const run_executable_tests = build_graph.addRunArtifact(executable_tests);
+    test_command.dependOn(&run_executable_tests.step);
 }
