@@ -16,6 +16,9 @@ fn stack_buffered(comptime n: usize) type {
             try stdout.print(format_string, format_arguments);
             try stdout.flush();
         }
+        pub fn print_line(comptime format_string: []const u8, format_arguments: anytype) !void {
+            return .print(format_string ++ "\n", format_arguments);
+        }
         pub fn readLine(allocator: Allocator) !String {
             var stdin_buffer = [_]u8{0} ** n;
             var stdin_reader = File.stdin().reader(&stdin_buffer);
