@@ -24,6 +24,7 @@
         - explain `.*` operator
         - explain `&` operator
     - explain `undefined`
+    - explain `@import`
 - `terminal.zig`
     - briefly explain `print`, `printLine`, `readLine` and `input` functions
         - even though these are functions what key word was used to create the bindings?
