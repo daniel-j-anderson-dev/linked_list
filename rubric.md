@@ -23,6 +23,9 @@
     - pointers
         - explain `.*` operator
         - explain `&` operator
+        - explain the syntax for how to represent the following types
+            - immutable pointer to `T`
+            - mutable pointer to `T`
     - explain `undefined`
     - explain `@import`
 - `terminal.zig`
