@@ -25,7 +25,7 @@ pub fn LinkedList(T: type) type {
         pub const Node = struct {
             /// A pointer to the actual data at this node
             data: *T,
-            /// A nullable pointer to the next node in the list
+            /// A nullable (aka optional) pointer to the next node in the list
             next: ?*Node,
 
             /// allocate a `Node` and it's
