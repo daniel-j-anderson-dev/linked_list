@@ -4,6 +4,7 @@
         - what are the two `Allocator` methods used to manage memory in `linked_list.zig`
         - explain what the responsibilities of the owner of a value (unlike rust zig does not **enforce** ownership)
         - explain `defer`
+            - hint: comment out the `defer` line in `test` `"push and pop"` 
     - types
         - explain how to create a binding to a specific data structure (grouped data and functions)
         - explain how to represent the type of tuples whose 0th field is of type `usize` and 1th field is of type `isize`
