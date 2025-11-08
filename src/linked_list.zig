@@ -1,25 +1,23 @@
 // IMPORTS
-
-// `const` creates an immutable binding.
-// In this case it is a type binding.
-// the specific type is the standard library type which is just module.
-// the standard library type is accessed through the compiler builtin function `@import`
+/// `const` creates an immutable binding.
+/// In this case it is a type binding.
+/// the specific type is the standard library type which is just module.
+/// the standard library type is accessed through the compiler builtin function `@import`
 const std: type = @import("std");
-// create a type level binding to the standard library's `Allocator` interface.
+/// create a type level binding to the standard library's `Allocator` interface.
 const Allocator: type = std.mem.Allocator;
 
-// `ArrayList` is a function that takes in the element type and returns the specific ArrayList type
+/// `ArrayList` is a function that takes in the element type and returns the specific ArrayList type
 const ArrayList: fn (type) type = std.ArrayList;
 
 const my_lib = @import("root.zig");
 const terminal = my_lib.terminal;
 
-// `LinkedList` is a function that takes in the element type and returns the specific `LinkedList` type.
+/// `LinkedList` is a function that takes in the element type and returns the specific `LinkedList` type.
 pub fn LinkedList(T: type) type {
     // return the data structure of our linked list type
     return struct {
         // TYPES
-
         /// A type level binding to this specific `LinkedList` type
         const Self: type = @This();
 
