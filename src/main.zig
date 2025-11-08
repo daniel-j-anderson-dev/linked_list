@@ -5,7 +5,7 @@ const Allocator = std.mem.Allocator;
 
 /// this is a binding to the type described in `root.zig`. see `build.zig` line 7, 8
 const my_lib = @import("my_lib");
-const LinkedList = my_lib.LinkedList;
+const LinkedList = my_lib.linked_list.LinkedList;
 const terminal = my_lib.terminal;
 
 const String = ArrayList(u8);
