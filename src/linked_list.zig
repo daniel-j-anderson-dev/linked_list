@@ -10,7 +10,7 @@ const Allocator: type = std.mem.Allocator;
 /// `ArrayList` is a function that takes in the element type and returns the specific ArrayList type
 const ArrayList: fn (type) type = std.ArrayList;
 
-const my_lib = @import("root.zig");
+const my_lib = @import("my_lib");
 const terminal = my_lib.terminal;
 
 /// `LinkedList` is a function that takes in the element type and returns the specific `LinkedList` type.
