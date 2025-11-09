@@ -3,7 +3,7 @@
     - memory management
         - what are the two `Allocator` methods used to manage memory in `linked_list.zig`
         - explain what the responsibilities of the owner of a value (unlike rust zig does not **enforce** ownership)
-        - explain `defer`
+        - explain control-flow keyword `defer`
             - hint: comment out the `defer` line in `test` `"push and pop"` 
     - types
         - explain how to create a binding to a specific data structure (grouped data and functions)
@@ -11,7 +11,7 @@
         - explain `@This` built in functions
         - `LinkedList` is a generic type why is the binding declared as a function?
     - optional
-        - explain `orelse` keyword
+        - explain control-flow keyword `orelse`
         - explain  `.?` operator
         - explain syntax for representing an optional type
         - explain the following syntaxes. What are the rust equivalents?
@@ -19,7 +19,7 @@
             - `while (optional_value) |value| {}`
     - errors
         - explain what is meant when a function returns `!T`
-        - explain `try` keyword
+        - explain `try` operator
     - pointers
         - explain `.*` operator
         - explain `&` operator
@@ -29,7 +29,7 @@
     - explain `undefined`
     - explain `@import`
 - `terminal.zig`
-    - briefly explain `print`, `printLine`, `readLine` and `input` functions
+    - briefly explain `print`, `printLine`, `readLine` and `input` functions. (the `const`s at the bottom of the file)
         - even though these are functions what key word was used to create the bindings?
         - what is the largest value that can be printed/read (what is the buffer size)?
     - explain the `stack_buffered` function
