@@ -74,7 +74,7 @@
       for (collection) |element| {} // loop over copies
       for (collection) |*element| {} // loop over mutable pointers to elements
       ```
-# modules
+## modules
 - java
   - `package`, `module`: declares a module and creates a binding to it
   - `class`, `enum`, `record`: declares a module and creates a binding to it
