@@ -1,7 +1,13 @@
 # Rubric
+- definitions
+    - **type**: in this document means Abstract Datatype while `type` will be used to talk about the zig keyword
+    - **module**: in this document means a collection of data/functions
+        - wether the language calls that collection of data/functions a class or module the defining feature is a unique named scope for data/functions
+        - an interface is a module that describes no data
 - `linked_list.zig`
     - memory management
         - what are the two `Allocator` methods used to manage memory in `linked_list.zig`
+            - hint: see the methods of the `LinkedList(T).Node` type
         - explain what the responsibilities of the owner of a value (unlike rust zig does not **enforce** ownership)
         - explain control-flow keyword `defer`
             - hint: comment out the `defer` line in `test` `"push and pop"` 
@@ -20,6 +26,7 @@
     - errors
         - explain what is meant when a function returns `!T`
         - explain `try` operator
+            - hint: what operator in rust does the same thing`?`
     - pointers
         - explain `.*` operator
         - explain `&` operator
@@ -64,3 +71,46 @@
             for (collection) |element| {} // loop over copies
             for (collection) |*element| {} // loop over mutable pointers to elements
             ```
+    - namespaces
+        how to define a unquiet scope of data/functionality in different langs.
+        - java
+            - `package`, `module`: declares a module and creates a binding to it
+            - `class`, `enum`, `record`: declares a module and creates a binding to it
+                - represents a product type
+            - `interface`, `abstract class`: declares a module and creates a binding to it
+                - represents a shared set of functionality
+        - rust
+            - `mod`: declares a module and creates a binding to it
+            - `struct`: declares a module and creates a binding to it
+                - represents a product type
+            - `enum`, `union`: declares a module and creates a binding to it
+                - represents a sum type
+            - `trait`: declares a module and creates a binding to it
+                - has no data
+                - represents a shared set of functionality
+        - cpp
+            - `module`, `namespace`: declares a module and creates a binding to it
+            - `class`, `struct`: declares a module and creates a binding to it
+                - represents a product type
+            - `enum class`, `union`: declares a module and creates a binding to it
+                - represents a sum type
+            - `abstract class`:  declares a module and creates a binding to it
+                - represents a shared set of functionality
+        - zig
+            - `const`: creates a binding. (in this case we only about bindings to module which zig calls `type`s)
+            - `struct`: defines a module
+                - represents a product type
+            - `union`: defines a module
+                - represents a sum type
+            - reasons about shared behavior using reflection to check the if the type being passed has the required methods and those methods have the correct signature
+            - Notice how zig is the only language that
+                - separates binding of abstract types with their definition.
+                    ```zig
+                    // create a new binding called `str` it is assigned to the type `[]const u8` (read as a slice of `u8`)
+                    const str: type = []const u8;
+
+                    // create a new binding called `Name` it is assigned to a new type with the following data/functions
+                    // `const` creates the binding
+                    // `struct` defines the type 
+                    const Name: type = struct { first: str, last: str };
+                    ```
