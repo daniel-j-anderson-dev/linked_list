@@ -71,8 +71,9 @@ pub fn LinkedList(T: type) type {
         // ACCESSORS
         /// append value to the front of this `LinkedList`
         pub fn push(self: *Self, allocator: Allocator, value: T) !void {
-            self.head = try Node.init(allocator, value, self.head);
-            self.length += 1;
+            const maybe_new_node = Node.init(allocator, value, self.head);
+            const new_node = try maybe_new_node;
+            self.head = new_node;
         }
 
         // MUTATORS
@@ -80,7 +81,6 @@ pub fn LinkedList(T: type) type {
         pub fn pop(self: *Self) ?*Node {
             var popped = self.head orelse return null;
             self.head = popped.next;
-            self.length -= 1;
             popped.next = null;
             return popped;
         }
@@ -94,6 +94,6 @@ test "push and pop" {
     defer l.deinit(test_allocator);
     for (0..100) |i| {
         try l.push(test_allocator, i);
-        (try l.pop()).deinit(test_allocator);
+        l.pop().?.deinit(test_allocator);
     }
 }
